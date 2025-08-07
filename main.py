@@ -1,5 +1,5 @@
 def main():
-    print("Hello from medicalassistant!")
+    print("Hello I'm a LLM-Powered Intelligent Query–Retrieval System!")
 
 
 if __name__ == "__main__":
