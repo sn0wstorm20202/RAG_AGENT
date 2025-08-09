@@ -72,9 +72,6 @@ GROQ_API_KEY=your_groq_api_key_here
 # Pinecone Configuration
 PINECONE_INDEX_NAME=rag-agent
 PINECONE_ENV=us-east-1
-
-# Optional: Backend Configuration
-UPLOAD_DIR=./uploaded_docs
 ```
 
 **Important**: The `.env` file is already in `.gitignore` to keep your API keys secure. Never commit this file to version control.
