@@ -95,7 +95,7 @@ pip install -r requirements.txt
 #### Start Backend Server
 ```bash
 cd Backend
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn main:app --host 0.0.0.0 --port 10000
 ```
 
 #### Start Frontend Application
