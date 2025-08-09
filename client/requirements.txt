@@ -1,2 +1,8 @@
+# Streamlit Frontend
 streamlit
+
+# HTTP Requests
 requests
+
+# Additional utilities
+python-dotenv

@@ -10,8 +10,7 @@ langchain-core
 langchain-groq
 
 # Vectorstore
-# chromadb
-pinecone
+pinecone-client
 
 # Embeddings
 # sentence-transformers
@@ -19,7 +18,7 @@ pinecone
 langchain-google-genai
 
 # PDF Parsing
-PyPDF  # backend for PyPDFLoader via langchain_community
+PyPDF2
 
 # Environment Variables
 python-dotenv
@@ -29,9 +28,10 @@ pydantic
 requests
 tqdm
 
-# Logging (optional but recommended)
+# Logging
 loguru
 
-
-
-#  uv pip install -r requirements.txt
+# Additional dependencies for full functionality
+numpy
+pandas
+typing-extensions
