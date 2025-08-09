@@ -1,8 +1,7 @@
 [project]
 name = "rag-agent"
 version = "0.1.0"
-description = "A LLM-Powered Intelligent Query–Retrieval System that uses Large Language Models (LLMs) to process natural 
-language queries and retrieve relevant information from large unstructured documents such as policy documents, contracts, and emails."
+description = "A LLM-Powered Intelligent Query–Retrieval System that uses Large Language Models (LLMs) to process natural language queries and retrieve relevant information from large unstructured documents such as policy documents, contracts, and emails."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []

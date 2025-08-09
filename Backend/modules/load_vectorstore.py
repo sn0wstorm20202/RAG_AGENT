@@ -13,7 +13,7 @@ load_dotenv()
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
 PINECONE_API_KEY=os.getenv("PINECONE_API_KEY")
 PINECONE_ENV="us-east-1"
-PINECONE_INDEX_NAME="ragagent"
+PINECONE_INDEX_NAME="rag-agent"
 
 os.environ["GOOGLE_API_KEY"]=GOOGLE_API_KEY
 
@@ -43,35 +43,63 @@ index=pc.Index(PINECONE_INDEX_NAME)
 # load,split,embed and upsert pdf docs content
 
 def load_vectorstore(uploaded_files):
+    # Validate environment variables
+    if not GOOGLE_API_KEY:
+        raise ValueError("GOOGLE_API_KEY environment variable is not set")
+    if not PINECONE_API_KEY:
+        raise ValueError("PINECONE_API_KEY environment variable is not set")
+    
+    # Validate input files
+    if not uploaded_files:
+        raise ValueError("No files provided")
+    
+    # Validate file types
+    for file in uploaded_files:
+        if not file.filename.lower().endswith('.pdf'):
+            raise ValueError(f"File {file.filename} is not a PDF")
+        if not file.filename:
+            raise ValueError("File has no filename")
+    
     embed_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     file_paths = []
-    # 1.Upload
-    for file in uploaded_files:
-        save_path = Path(UPLOAD_DIR) / file.filename
-        with open(save_path, "wb") as f:
-            f.write(file.file.read())
-        file_paths.append(str(save_path))
     
+    try:
+        # 1.Upload
+        for file in uploaded_files:
+            save_path = Path(UPLOAD_DIR) / file.filename
+            with open(save_path, "wb") as f:
+                f.write(file.file.read())
+            file_paths.append(str(save_path))
+        
 
-    # 2. Load and Split
-    for file_path in file_paths:
-        loader = PyPDFLoader(file_path)
-        documents = loader.load()
+        # 2. Load and Split
+        for file_path in file_paths:
+            loader = PyPDFLoader(file_path)
+            documents = loader.load()
 
-        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-        chunks = splitter.split_documents(documents)
+            splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+            chunks = splitter.split_documents(documents)
 
-        texts = [chunk.page_content for chunk in chunks]
-        metadatas = [chunk.metadata for chunk in chunks]
-        ids = [f"{Path(file_path).stem}-{i}" for i in range(len(chunks))]
+            texts = [chunk.page_content for chunk in chunks]
+            metadatas = [chunk.metadata for chunk in chunks]
+            ids = [f"{Path(file_path).stem}-{i}" for i in range(len(chunks))]
 
-        #3. Embed and Upsert
-        print(f"🔍 Embedding {len(texts)} chunks...")
-        embeddings = embed_model.embed_documents(texts)
+            #3. Embed and Upsert
+            print(f"🔍 Embedding {len(texts)} chunks...")
+            embeddings = embed_model.embed_documents(texts)
 
-        print("📤 Uploading to Pinecone...")
-        with tqdm(total=len(embeddings), desc="Upserting to Pinecone") as progress:
-            index.upsert(vectors=zip(ids, embeddings, metadatas))
-            progress.update(len(embeddings))
+            print("📤 Uploading to Pinecone...")
+            with tqdm(total=len(embeddings), desc="Upserting to Pinecone") as progress:
+                index.upsert(vectors=zip(ids, embeddings, metadatas))
+                progress.update(len(embeddings))
 
-        print(f"✅ Upload complete for {file_path}")
+            print(f"✅ Upload complete for {file_path}")
+            
+    except Exception as e:
+        # Clean up uploaded files on error
+        for file_path in file_paths:
+            try:
+                Path(file_path).unlink(missing_ok=True)
+            except:
+                pass
+        raise e

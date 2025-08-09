@@ -13,10 +13,16 @@ import os
 
 router=APIRouter()
 
-@router.post("/ask/")
+@router.post("/ask_questions/")
 async def ask_question(question: str = Form(...)):
     try:
         logger.info(f"user query: {question}")
+
+        # Validate environment variables
+        if not os.environ.get("PINECONE_API_KEY"):
+            return JSONResponse(status_code=500, content={"error": "PINECONE_API_KEY not configured"})
+        if not os.environ.get("PINECONE_INDEX_NAME"):
+            return JSONResponse(status_code=500, content={"error": "PINECONE_INDEX_NAME not configured"})
 
         # Embed model + Pinecone setup
         pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
