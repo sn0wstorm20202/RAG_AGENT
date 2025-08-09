@@ -31,26 +31,38 @@ async def ask_question(question: str = Form(...)):
         embedded_query = embed_model.embed_query(question)
         res = index.query(vector=embedded_query, top_k=3, include_metadata=True)
 
+        logger.debug(f"Retrieved {len(res['matches'])} matches from Pinecone")
+        for i, match in enumerate(res["matches"]):
+            logger.debug(f"Match {i}: score={match['score']}, metadata={match['metadata']}")
+
         docs = [
             Document(
                 page_content=match["metadata"].get("text", ""),
                 metadata=match["metadata"]
             ) for match in res["matches"]
         ]
+        
+        logger.debug(f"Created {len(docs)} documents")
+        for i, doc in enumerate(docs):
+            logger.debug(f"Doc {i}: content_length={len(doc.page_content)}, metadata={doc.metadata}")
 
+        # Create a simple retriever that returns the retrieved documents
         class SimpleRetriever(BaseRetriever):
-            tags: Optional[List[str]] = Field(default_factory=list)
-            metadata: Optional[dict] = Field(default_factory=dict)
-
             def __init__(self, documents: List[Document]):
                 super().__init__()
                 self._docs = documents
 
             def _get_relevant_documents(self, query: str) -> List[Document]:
+                logger.debug(f"Retriever called with query: {query}, returning {len(self._docs)} docs")
                 return self._docs
 
         retriever = SimpleRetriever(docs)
         chain = get_llm_chain(retriever)
+        
+        # Test the retriever directly
+        retrieved_docs = retriever.get_relevant_documents(question)
+        logger.debug(f"Direct retriever test returned {len(retrieved_docs)} docs")
+        
         result = query_chain(chain, question)
 
         logger.info("query successful")

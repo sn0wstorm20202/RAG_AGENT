@@ -84,6 +84,11 @@ def load_vectorstore(uploaded_files):
             metadatas = [chunk.metadata for chunk in chunks]
             ids = [f"{Path(file_path).stem}-{i}" for i in range(len(chunks))]
 
+            # Add text content to metadata so it can be retrieved later
+            for i, metadata in enumerate(metadatas):
+                metadata['text'] = texts[i]
+                metadata['source'] = str(file_path)
+
             #3. Embed and Upsert
             print(f"🔍 Embedding {len(texts)} chunks...")
             embeddings = embed_model.embed_documents(texts)

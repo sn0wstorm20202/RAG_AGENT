@@ -90,7 +90,7 @@ pip install -r requirements.txt
 #### Frontend Dependencies
 ```bash
 cd client
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 ### 4. Run the Application

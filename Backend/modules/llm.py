@@ -26,9 +26,14 @@ Question: {query}
 Answer the question based on the context provided. If the context doesn't contain enough information to answer the question, say so."""
     )
 
-    return RetrievalQA.from_chain_type(
+    chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
         retriever=retriever,
         return_source_documents=True
     )
+    
+    # Set the chain's retriever to ensure it uses our custom retriever
+    chain.retriever = retriever
+    
+    return chain
